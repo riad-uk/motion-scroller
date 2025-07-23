@@ -1,103 +1,157 @@
-import Image from "next/image";
+'use client';
+
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
+
+// Icon components using simple SVG shapes
+const StarIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
+
+const HeartIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+  </svg>
+);
+
+const CircleIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <circle cx="12" cy="12" r="8" />
+  </svg>
+);
+
+const TriangleIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2l10 18H2L12 2z" />
+  </svg>
+);
+
+const DiamondIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2l4 8-4 12-4-12 4-8z" />
+  </svg>
+);
+
+const FloatingIcon = ({ icon: Icon, finalPosition, color, scrollYProgress, startPosition }: {
+  icon: React.ComponentType;
+  finalPosition: { x: number; y: number };
+  color: string;
+  scrollYProgress: any;
+  startPosition: { x: number; y: number };
+}) => {
+  // Transform scroll progress to icon position
+  const x = useTransform(scrollYProgress, [0, 1], [startPosition.x, finalPosition.x]);
+  const y = useTransform(scrollYProgress, [0, 1], [startPosition.y, finalPosition.y]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 0.5, 1, 1]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 0.7, 1]);
+  const rotate = useTransform(scrollYProgress, [0, 1], [360, 0]);
+
+  return (
+    <motion.div
+      className="absolute"
+      style={{ 
+        x,
+        y,
+        opacity,
+        scale,
+        rotate,
+        color 
+      }}
+    >
+      <Icon />
+    </motion.div>
+  );
+};
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  // Generate random starting positions for each icon
+  const generateStartPosition = (index: number) => {
+    const seed = index * 123; // Use index as seed for consistent randomness
+    const randomX = ((seed * 9301 + 49297) % 233280) / 233280 * 400 - 200;
+    const randomY = ((seed * 9301 + 49297 + 1000) % 233280) / 233280 * 400 - 200;
+    return { x: randomX, y: randomY };
+  };
+
+  const icons = [
+    { icon: StarIcon, position: { x: -80, y: -60 }, color: '#FFD700', startPosition: generateStartPosition(0) },
+    { icon: HeartIcon, position: { x: 80, y: -40 }, color: '#FF6B6B', startPosition: generateStartPosition(1) },
+    { icon: CircleIcon, position: { x: -60, y: 40 }, color: '#4ECDC4', startPosition: generateStartPosition(2) },
+    { icon: TriangleIcon, position: { x: 60, y: 60 }, color: '#45B7D1', startPosition: generateStartPosition(3) },
+    { icon: DiamondIcon, position: { x: 0, y: -80 }, color: '#96CEB4', startPosition: generateStartPosition(4) },
+    { icon: StarIcon, position: { x: -100, y: 0 }, color: '#FFEAA7', startPosition: generateStartPosition(5) },
+    { icon: HeartIcon, position: { x: 100, y: 20 }, color: '#FD79A8', startPosition: generateStartPosition(6) },
+    { icon: CircleIcon, position: { x: 0, y: 80 }, color: '#6C5CE7', startPosition: generateStartPosition(7) },
+  ];
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Spacer to allow scrolling */}
+      <div className="h-screen flex items-center justify-center">
+        <motion.h1 
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-4xl md:text-6xl font-bold text-white text-center"
+        >
+          Scroll down to see the magic ✨
+        </motion.h1>
+      </div>
+
+      {/* Floating Icons Block */}
+      <div className="h-screen flex items-center justify-center relative" ref={containerRef}>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: false }}
+          className="relative w-80 h-80 bg-white/10 backdrop-blur-lg rounded-3xl border border-white/20 shadow-2xl flex items-center justify-center"
+        >
+          <motion.div
+            className="text-white text-2xl font-semibold text-center z-10"
+            style={{
+              opacity: useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 0, 1, 1])
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            Floating Icons
+            <br />
+            <span className="text-lg opacity-80">Animation Demo</span>
+          </motion.div>
+          
+          {/* Render floating icons */}
+          {icons.map((iconData, index) => (
+            <FloatingIcon
+              key={index}
+              icon={iconData.icon}
+              finalPosition={iconData.position}
+              color={iconData.color}
+              scrollYProgress={scrollYProgress}
+              startPosition={iconData.startPosition}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          ))}
+        </motion.div>
+      </div>
+
+      {/* Additional content for more scrolling */}
+      <div className="h-screen flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: false }}
+          className="text-white text-center"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <h2 className="text-3xl font-bold mb-4">Pretty cool, right? 🎉</h2>
+          <p className="text-lg opacity-80">Icons scattered and animated into perfect formation!</p>
+        </motion.div>
+      </div>
+    </main>
   );
 }
