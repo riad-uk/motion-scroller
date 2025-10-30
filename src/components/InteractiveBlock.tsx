@@ -121,12 +121,26 @@ function AnimatedHeading({ value, className, shouldAnimate }: { value: string; c
 
 export default function InteractiveBlock() {
     const sectionRef = useRef<HTMLElement>(null);
+    const galleryRef = useRef<HTMLDivElement>(null);
+    const galleryWrapperRef = useRef<HTMLDivElement>(null);
     const [shouldAnimate, setShouldAnimate] = useState(true);
     const [isDesktop, setIsDesktop] = useState(false);
     const { scrollY } = useScroll();
     const { scrollYProgress } = useScroll({
         target: sectionRef,
         offset: ["start end", "end start"]
+    });
+    
+    // Gallery scroll progress - tracks the tall wrapper for smooth card transitions
+    const { scrollYProgress: galleryProgress } = useScroll({
+        target: galleryWrapperRef,
+        offset: ["start start", "end end"]
+    });
+    
+    // Overlay reveal progress - tracks when gallery element enters viewport
+    const { scrollYProgress: overlayProgress } = useScroll({
+        target: galleryWrapperRef,
+        offset: ["start end", "start center"]
     });
     
     // Detect desktop breakpoint (lg: 1024px)
@@ -149,6 +163,25 @@ export default function InteractiveBlock() {
     const y5 = useTransform(scrollYProgress, [0, 1], isDesktop ? [100, -100] : [0, 0]);
     const y6 = useTransform(scrollYProgress, [0, 1], isDesktop ? [280, -280] : [0, 0]);
     
+    // Gallery card transforms - smooth sequential transitions
+    const card1Y = useTransform(galleryProgress, [0, 0.25], ['0%', '-100%']); // First image
+    const card2Y = useTransform(galleryProgress, [0.25, 0.5], ['0%', '-100%']); // Second image
+    const card3Y = useTransform(galleryProgress, [0.5, 0.75], ['0%', '-100%']); // Third image
+    const card4Y = useTransform(galleryProgress, [0.75, 1], ['0%', '-100%']); // Fourth image
+    // Fifth image stays visible at bottom (y: '0%')
+    
+    // Dark overlay that reveals gallery - animates from 100% to 0% height (bottom to top)
+    // Triggers when gallery enters viewport and animates over the full range
+    const overlayHeight = useTransform(overlayProgress, [0, 1], ['100%', '0%']);
+    
+    const cards = [
+        { id: 5, image: '/images/scroller-gallery/img-5.jpg', y: '0%', zIndex: 1 }, // Last image (shows last)
+        { id: 4, image: '/images/scroller-gallery/img-4.jpg', y: card4Y, zIndex: 2 },
+        { id: 3, image: '/images/scroller-gallery/img-3.jpg', y: card3Y, zIndex: 3 },
+        { id: 2, image: '/images/scroller-gallery/img-2.jpg', y: card2Y, zIndex: 4 },
+        { id: 1, image: '/images/scroller-gallery/img-1.jpg', y: card1Y, zIndex: 50 }, // First image (shows first, on top)
+    ];
+    
     useEffect(() => {
         const unsubscribe = scrollY.on('change', (latest) => {
             if (sectionRef.current) {
@@ -170,7 +203,7 @@ export default function InteractiveBlock() {
     }, [scrollY]);
     
     return (
-        <section ref={sectionRef} className="interactive-block py-[100px] lg:py-[200px]">
+        <section ref={sectionRef} className="interactive-block py-[100px] lg:pt-[200px]">
             <div className="w-full mx-auto px-[2rem] md:px-[2rem] 2xl:px-[4rem]">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div className="col-span-1 text-white text-[14px] md:text-[16px] fkt">
@@ -265,8 +298,34 @@ export default function InteractiveBlock() {
                             </motion.p>
                         </motion.div>
 
-                        <div className="scrolling-gallery-swiper">
+                        <div ref={galleryWrapperRef} className="relative h-[200vh]">
+                            <div 
+                                ref={galleryRef}
+                                className="scrolling-gallery-swiper sticky top-[100px] w-full h-[400px] lg:h-[500px] 2xl:h-[600px] overflow-hidden rounded-lg"
+                            >
+                            {cards.map((card) => (
+                                <motion.div
+                                    key={card.id}
+                                    style={{ 
+                                        y: card.y,
+                                        zIndex: card.zIndex,
+                                        backgroundImage: `url(${card.image})`,
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center'
+                                    }}
+                                    className="absolute inset-0 w-full h-full"
+                                />
+                            ))}
                             
+                            {/* Dark overlay that reveals from bottom to top */}
+                            <motion.div
+                                style={{ 
+                                    height: overlayHeight,
+                                    zIndex: 100
+                                }}
+                                className="absolute bottom-0 left-0 right-0 bg-[#19191E] pointer-events-none"
+                            />
+                        </div>
                         </div>
 
                     </div>
