@@ -1,0 +1,119 @@
+@use "tailwindcss";
+
+@font-face {
+  font-family: 'fk_roman_standardoblique';
+  src: url('/fonts/fkromanstandard-oblique-webfont.woff2') format('woff2'),
+    url('/fonts/fkromanstandard-oblique-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+
+}
+
+
+
+
+@font-face {
+  font-family: 'fk_roman_standardregular';
+  src: url('/fonts/fkromanstandard-regular-webfont.woff2') format('woff2'),
+    url('/fonts/fkromanstandard-regular-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+
+}
+
+@font-face {
+  font-family: 'FKTGnarly_Rg';
+  src: url('/fonts/FKTGnarly_Rg.woff2') format('woff2'),
+    url('/fonts/FKTGnarly_Rg.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+
+}
+
+
+
+
+@font-face {
+  font-family: 'FKTGnarly_SBd';
+  src: url('/fonts/FKTGnarly_SBd.woff2') format('woff2'),
+    url('/fonts/FKTGnarly_SBd.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+
+}
+
+@mixin roman {
+  font-family: 'fk_roman_standardregular', sans-serif;
+}
+
+@mixin roman-italic {
+  font-family: 'fk_roman_standardoblique', sans-serif;
+}
+
+@mixin fkt {
+  font-family: 'FKTGnarly_Rg', sans-serif;
+}
+
+@mixin fkt-sb {
+  font-family: 'FKTGnarly_SBd', sans-serif;
+}
+
+:root {
+  --background: #19191E;
+  --foreground: #FDFDFD;
+  --dark: #19191E;
+  --white: #FDFDFD;
+  --grey: #EEEEEE;
+  --cream: #F6F1E6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #19191E;
+    --foreground: #FDFDFD;
+    --dark: #19191E;
+    --white: #FDFDFD;
+    --grey: #EEEEEE;
+    --cream: #F6F1E6;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  @include fkt();
+  color: var(--dark);
+}
+
+.roman {
+  @include roman;
+}
+
+.roman-italic {
+  @include roman-italic;
+}
+
+.fkt {
+  @include fkt;
+}
+
+.fkt-sb {
+  @include fkt-sb;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @include roman;
+}
+
+
+// Interactive block
+
+.asterisk {
+  font-size: 0.8em;
+  vertical-align: super;
+}

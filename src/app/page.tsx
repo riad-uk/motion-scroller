@@ -65,6 +65,117 @@ const FloatingIcon = ({ icon: Icon, finalPosition, color, scrollYProgress, start
   );
 };
 
+const ProgressiveColumns = () => {
+  const columnsRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: columnsRef,
+    offset: ["start end", "end start"] // Extended range for two-phase animation
+  });
+
+  // Phase 1: Left-to-right fill (0 to 0.5 scroll progress)
+  const leftFillWidth = useTransform(
+    scrollYProgress,
+    [0, 0.5], // First half of scroll
+    ["0%", "100%"]
+  );
+
+  // Phase 2: Right-to-left fill (0.5 to 1 scroll progress)
+  const rightFillWidth = useTransform(
+    scrollYProgress,
+    [0.5, 1], // Second half of scroll
+    ["0%", "100%"]
+  );
+
+  // Phase 1: Text appears (0 to 0.5 scroll progress)
+  const textRevealWidth = useTransform(
+    scrollYProgress,
+    [0, 0.5],
+    ["0%", "100%"]
+  );
+
+  // Phase 2: Text disappears (0.5 to 1 scroll progress)
+  const textDisappearWidth = useTransform(
+    scrollYProgress,
+    [0.5, 1],
+    ["100%", "0%"]
+  );
+
+  return (
+    <div 
+      ref={columnsRef}
+      className="w-full h-screen flex relative"
+      style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      }}
+    >
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div
+          key={index}
+          className="relative flex-1 overflow-hidden"
+          style={{ width: '12.5%' }}
+        >
+          {/* Background column */}
+          <div className="absolute inset-0 bg-white/10" />
+          
+          {/* Phase 1: Left-to-right fill */}
+          <motion.div
+            className="absolute top-0 left-0 bottom-0 bg-purple-600"
+            style={{
+              width: leftFillWidth,
+            }}
+            initial={{ width: "0%" }}
+          />
+          
+          {/* Phase 2: Right-to-left fill */}
+          <motion.div
+            className="absolute top-0 right-0 bottom-0 bg-indigo-600"
+            style={{
+              width: rightFillWidth,
+            }}
+            initial={{ width: "0%" }}
+          />
+          
+          {/* Optional column separator */}
+          {index < 7 && (
+            <div className="absolute top-0 right-0 w-px h-full bg-white/20" />
+          )}
+        </div>
+      ))}
+      
+      {/* Centered WEBSITE text with dual-phase effect */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="relative overflow-hidden">
+          <div className="text-white text-8xl font-bold tracking-wider opacity-20">
+            WEBSITE
+          </div>
+          {/* Phase 1: Text reveal */}
+          <motion.div
+            className="absolute top-0 left-0 overflow-hidden"
+            style={{
+              width: textRevealWidth,
+            }}
+          >
+            <div className="text-white text-8xl font-bold tracking-wider whitespace-nowrap">
+              WEBSITE
+            </div>
+          </motion.div>
+          {/* Phase 2: Text disappear overlay */}
+          <motion.div
+            className="absolute top-0 left-0 overflow-hidden"
+            style={{
+              width: textDisappearWidth,
+            }}
+          >
+            <div className="text-white text-8xl font-bold tracking-wider whitespace-nowrap">
+              WEBSITE
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -139,6 +250,9 @@ export default function Home() {
         </motion.div>
       </div>
 
+      {/* Progressive Columns Block */}
+      <ProgressiveColumns />
+
       {/* Additional content for more scrolling */}
       <div className="h-screen flex items-center justify-center">
         <motion.div
@@ -149,7 +263,7 @@ export default function Home() {
           className="text-white text-center"
         >
           <h2 className="text-3xl font-bold mb-4">Pretty cool, right? 🎉</h2>
-          <p className="text-lg opacity-80">Icons scattered and animated into perfect formation!</p>
+          <p className="text-lg opacity-80">Watch the columns fill progressively as you scroll!</p>
         </motion.div>
       </div>
     </main>
